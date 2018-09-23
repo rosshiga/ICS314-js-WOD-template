@@ -21,7 +21,7 @@ then
 	exit 1
 fi
 
-curl -sS -H "Authorization: token $OAUTH_TOKEN" https://api.github.com/repos/$USERNAME/$1/collaborators/$GRADER -d '{"permission":"pull"}' -X PUT
+#curl -sS -H "Authorization: token $OAUTH_TOKEN" https://api.github.com/repos/$USERNAME/$1/collaborators/$GRADER -d '{"permission":"pull"}' -X PUT
 
 shopt -s dotglob
 
@@ -33,7 +33,16 @@ mv tmp/* $1 &&
 rm -rf tmp &&
 
 cd $1 
+
+PROC=$(ps aux |grep idea | wc -l)
 idea $1.js 2> /dev/null
-git add index.html $1.js &&
+if [[ $PROC -gt 1 ]]
+then
+		echo Press enter to commit and push to GitHub
+		read
+fi
+
+git add . &&
 git commit -m "WOD done" &&
 git push
+
