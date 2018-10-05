@@ -16,7 +16,8 @@ This should run on any Linux machine that has curl and sed installed. This shoul
 * Your project will open in IntelliJ IDEA. Do the WOD.
 * If IDEA was already open before you ran the script, switch to the terminal and press enter to push your WOD to GitHub. If IDEA was not open, your project will be pushed to GitHub automatically when you close IDEA.
 
-Usage: create_repo.sh [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-c] [-j] [-s]
+```Usage: create_repo.sh [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-c] [-j] [-s]```
+
 |Command line argument| .env file name | Description|
 |---|---|---|
 | -n | REPONAME | repository name|
