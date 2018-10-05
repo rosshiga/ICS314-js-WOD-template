@@ -26,13 +26,13 @@ function mkrepo {
 	git clone git@github.com:$USERNAME/$REPONAME.git tmp &&
 	mv tmp/* $REPONAME &&
 	rm -rf tmp &&
-	if [ "$CSS" == "true" ]; then
-		touch $REPONAME/style.css
-		sed -i '/<head>/a <link rel="stylesheet" href="style.css">' $REPONAME/index.html
-	fi
 	if [ "$JS" == "true" ]; then 
 		touch $REPONAME/$REPONAME.js
 		sed -i '/<head>/a <script type="text/javascript" src="'"$REPONAME.js"'"></script>' $REPONAME/index.html
+	fi
+	if [ "$CSS" == "true" ]; then
+		touch $REPONAME/style.css
+		sed -i '/<head>/a <link rel="stylesheet" href="style.css">' $REPONAME/index.html
 	fi
 	if [ "$SEMANTIC" == "true" ]; then
 		sed -i '/<head>/a <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>' $REPONAME/index.html
@@ -108,3 +108,8 @@ mkrepo $REPONAME &&
 cd $REPONAME &&
 start_idea $REPONAME
 git_push
+echo 
+echo 
+echo ====================
+echo GitHub repo created
+echo URL: https://github.com/$USERNAME/$REPONAME
