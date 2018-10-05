@@ -25,8 +25,8 @@ This should run on any Linux machine that has curl and sed installed. This shoul
 | -p | PASSWORD | GitHub password|
 | -o | OAUTH_TOKEN | GitHub Oauth token|
 | -g | GRADER | GitHub username to give access to the repo|
-| -c | CSS | Add a 'style.css' file and a <link> tag in index.html|
-| -j | JS | Add a '<reponame>.js' file and a <script> tag in index.html|
+| -c | CSS | Add a 'style.css' file and a \<link\> tag in index.html|
+| -j | JS | Add a '\<reponame\>.js' file and a \<script\> tag in index.html|
 | -s | SEMANTIC | Add the Semantic and JQuery to your index.html|
 | -_ | UNDERSCORE | Add Underscore.js to your index.html|
 
