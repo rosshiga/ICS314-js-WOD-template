@@ -4,10 +4,21 @@ shopt -s dotglob
 source .create_repo.env
 
 function mkrepo {
-	RESPONSE=$(curl -sS -H "Authorization: token $OAUTH_TOKEN" https://api.github.com/user/repos -d '{"name":"'$REPONAME'", "private":"true", "auto_init":"true"}')
+	if [[ "$PASSWORD" ]]; then
+		AUTH="$USERNAME:$PASSWORD"
+		METHOD="--user"
+	elif [[ "$OAUTH_TOKEN" ]]; then
+		METHOD="-H"
+		AUTH="Authorization: token $OAUTH_TOKEN"
+	else
+		METHOD="--user"
+		AUTH="$USERNAME"
+	fi
+
+	RESPONSE=$(curl -sS $METHOD "$AUTH" https://api.github.com/user/repos -d '{"name":"'$REPONAME'", "private":"true", "auto_init":"true"}')
 	if [[ $(grep "Bad credentials" <<< "$RESPONSE") ]]
 	then
-		echo "Invalid password"
+		echo "Invalid password or token"
 		exit 1
 	fi
 	if [[ $(grep "errors" <<< "$RESPONSE") ]]
@@ -17,7 +28,7 @@ function mkrepo {
 	fi
 
 	if [ ! -z "$GRADER" ]; then
-		curl -sS -H "Authorization: token $OAUTH_TOKEN" https://api.github.com/repos/$USERNAME/$REPONAME/collaborators/$GRADER -d '{"permission":"pull"}' -X PUT
+		curl -sS $METHOD "$AUTH" https://api.github.com/repos/$USERNAME/$REPONAME/collaborators/$GRADER -d '{"permission":"pull"}' -X PUT
 	fi
 
 	cp -rap js_template/. $REPONAME &&
@@ -44,11 +55,14 @@ function mkrepo {
 
 function start_idea {
 	PROC=$(ps aux |grep idea | wc -l)
+	echo
+	echo
+	echo Opening project in IntelliJ IDEA...
 	idea . 2> /dev/null
 	if [[ $PROC -gt 1 ]]
 	then
-			echo Press enter to commit and push to GitHub
-			read
+		echo Press enter to commit and push to GitHub
+		read
 	fi
 }
 
@@ -99,7 +113,7 @@ while getopts "n:u:p:o:g:cjs_" o; do
 done
 shift $((OPTIND-1))
 
-if [ -z "$REPONAME" ] || [ -z "$USERNAME" ] || [ -z "$PASSWORD$OAUTH_TOKEN" ]; then
+if [ -z "$REPONAME" ] || [ -z "$USERNAME" ]; then
 	usage
 	exit 1
 fi
