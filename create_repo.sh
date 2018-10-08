@@ -1,7 +1,5 @@
 #!/bin/bash
 
-COMMIT_MSG="WOD done"
-
 shopt -s dotglob
 source .create_repo.env
 
@@ -39,21 +37,17 @@ function mkrepo {
 	git clone git@github.com:$USERNAME/$REPONAME.git tmp &&
 	mv tmp/* $REPONAME &&
 	rm -rf tmp &&
-
 	if [ "$JS" == "true" ]; then 
 		touch $REPONAME/$REPONAME.js
 		sed -i '/<head>/a <script type="text/javascript" src="'"$REPONAME.js"'"></script>' $REPONAME/index.html
 	fi
-
 	if [ "$CSS" == "true" ]; then
 		touch $REPONAME/style.css
 		sed -i '/<head>/a <link rel="stylesheet" href="style.css">' $REPONAME/index.html
 	fi
-	
 	if [ "$SEMANTIC" == "true" ]; then
 		sed -i '/<head>/a <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>' $REPONAME/index.html
 	fi
-
 	if [ "$UNDERSCORE" == "true" ]; then
 		sed -i '/<head>/a <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>' $REPONAME/index.html
 	fi
@@ -82,22 +76,22 @@ function usage {
 	echo "Usage: $0 [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-m <commit msg>] [-c] [-j] [-s]"
 }
 
-while getopts "n:u:p:o:g:m:cjs_" o; do
+while getopts "n:u:p:o:g:m:cjs_r" o; do
 	case $o in 
 		n)
-			REPONAME="$OPTARG"
+			REPONAME=$OPTARG
 			;;
 		u)
-			USERNAME="$OPTARG"
+			USERNAME=$OPTARG
 			;;
 		p)
-			PASSWORD="$OPTARG"
+			PASSWORD=$OPTARG
 			;;
 		o)
-			OAUTH_TOKEN="$OPTARG"
+			OAUTH_TOKEN=$OPTARG
 			;;
 		g)
-			GRADER="$OPTARG"
+			GRADER=$OPTARG
 			;;
 		c)
 			CSS="true"
@@ -127,6 +121,10 @@ if [ -z "$REPONAME" ] || [ -z "$USERNAME" ]; then
 	exit 1
 fi
 
+if [[ "$PASSWORD" && "$OAUTH_TOKEN" ]]; then
+	echo WARNING: both password and oauth token have been given, using password.
+fi
+
 mkrepo $REPONAME &&
 cd $REPONAME &&
 start_idea $REPONAME
@@ -136,3 +134,4 @@ echo
 echo ====================
 echo GitHub repo created
 echo URL: https://github.com/$USERNAME/$REPONAME
+echo
