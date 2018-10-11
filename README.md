@@ -16,7 +16,7 @@ This should run on any Linux machine that has curl and sed installed. This shoul
 * Your project will open in IntelliJ IDEA. Do the WOD.
 * If IDEA was already open before you ran the script, switch to the terminal and press enter to push your WOD to GitHub. If IDEA was not open, your project will be pushed to GitHub automatically when you close IDEA.
 
-```Usage: create_repo.sh [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-c] [-j] [-s]```
+```Usage: create_repo.sh [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-m <commit message>] [-c] [-j] [-s] [-r] [-z]```
 
 |Command line argument| .env file name | Description|
 |---|---|---|
@@ -25,8 +25,11 @@ This should run on any Linux machine that has curl and sed installed. This shoul
 | -p | PASSWORD | GitHub password|
 | -o | OAUTH_TOKEN | GitHub Oauth token|
 | -g | GRADER | GitHub username to give access to the repo|
+| -m | COMMIT_MSG | Commit message |
+| -z | NO_COMMIT | Do not commit & push to github |
 | -c | CSS | Add a 'style.css' file and a \<link\> tag in index.html|
 | -j | JS | Add a '\<reponame\>.js' file and a \<script\> tag in index.html|
 | -s | SEMANTIC | Add the Semantic and JQuery to your index.html|
 | -_ | UNDERSCORE | Add Underscore.js to your index.html|
+| -r | REACT | Set up a React.js project (cannot be used with -c, -j, -s, or -_)|
 
