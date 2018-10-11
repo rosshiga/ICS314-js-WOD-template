@@ -1,7 +1,8 @@
 #!/bin/bash
 
 shopt -s dotglob
-source .create_repo.env
+MYDIR="$(dirname "$(realpath "$0")")"
+source $MYDIR/.create_repo.env
 
 function mkrepo {
 	if [[ "$PASSWORD" ]]; then
@@ -31,10 +32,29 @@ function mkrepo {
 		curl -sS $METHOD "$AUTH" https://api.github.com/repos/$USERNAME/$REPONAME/collaborators/$GRADER -d '{"permission":"pull"}' -X PUT
 	fi
 
-	cp -rap js_template/. $REPONAME &&
-	rename js_template $REPONAME $REPONAME/* &&
-	find $REPONAME -type f -exec sed -r -i "s/js_template/$REPONAME/" {} + &&
-	git clone git@github.com:$USERNAME/$REPONAME.git tmp &&
+	if [ "$REACT" == "true" ]; then
+		mkdir $REPONAME
+		cp $MYDIR/wod_template/.gitignore $REPONAME &&
+		cp -r $MYDIR/wod_template/{.idea,*.iml} $REPONAME &&
+		cp -rap $MYDIR/react_template $REPONAME/my-app &&
+		rm $REPONAME/my-app/src/* &&
+		touch $REPONAME/my-app/src/index.css &&
+		cat > $REPONAME/my-app/src/index.js << EOF
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+EOF
+
+		INDEX="$REPONAME/my-app/src/index.js"
+
+	else
+		cp -rap $MYDIR/wod_template/. $REPONAME &&
+		rename wod_template $REPONAME $REPONAME/* &&
+		find $REPONAME -type f -exec sed -r -i "s/wod_template/$REPONAME/" {} + 
+		INDEX="$REPONAME/index.html"
+	fi
+
+	[ "$?" == 0 ] && git clone git@github.com:$USERNAME/$REPONAME.git tmp &&
 	mv tmp/* $REPONAME &&
 	rm -rf tmp &&
 	if [ "$JS" == "true" ]; then 
@@ -58,7 +78,7 @@ function start_idea {
 	echo
 	echo
 	echo Opening project in IntelliJ IDEA...
-	idea . 2> /dev/null
+	idea $INDEX 2> /dev/null
 	if [[ $PROC -gt 1 ]]
 	then
 		echo Press enter to commit and push to GitHub
@@ -72,26 +92,26 @@ function git_push {
 	git push
 }
 
-function usage {
-	echo "Usage: $0 [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-m <commit msg>] [-c] [-j] [-s]"
-}
+function usage { 
+	echo "Usage: $0 [-n <repo name>] [-u <username> (-p <password> | -o <oath token>)] [-g <grader>] [-m <commit msg>] [-c] [-j] [-s] [-r] [-z]"
+} 
 
-while getopts "n:u:p:o:g:m:cjs_r" o; do
+while getopts "n:u:p:o:g:m:cjs_rz" o; do
 	case $o in 
 		n)
-			REPONAME=$OPTARG
+			REPONAME="$OPTARG"
 			;;
 		u)
-			USERNAME=$OPTARG
+			USERNAME="$OPTARG"
 			;;
 		p)
-			PASSWORD=$OPTARG
+			PASSWORD="$OPTARG"
 			;;
 		o)
-			OAUTH_TOKEN=$OPTARG
+			OAUTH_TOKEN="$OPTARG"
 			;;
 		g)
-			GRADER=$OPTARG
+			GRADER="$OPTARG"
 			;;
 		c)
 			CSS="true"
@@ -108,6 +128,12 @@ while getopts "n:u:p:o:g:m:cjs_r" o; do
 		m)
 			COMMIT_MSG="$OPTARG"
 			;;
+		z)
+			NO_COMMIT="true"
+			;;
+		r)
+			REACT="true"
+			;;
 		*)
 			usage
 			exit 1
@@ -121,6 +147,11 @@ if [ -z "$REPONAME" ] || [ -z "$USERNAME" ]; then
 	exit 1
 fi
 
+if [[ "$REACT" && ( "$CSS" == "true" || "$JS" == "true" || "$SEMANTIC" == "true" || "$UNDERSCORE" == "true" ) ]]; then
+	echo "Using React with CSS (-c), JS (-j), Semantic (-s), or Underscore (-_) is not supported at this time"
+	exit 1
+fi
+
 if [[ "$PASSWORD" && "$OAUTH_TOKEN" ]]; then
 	echo WARNING: both password and oauth token have been given, using password.
 fi
@@ -128,7 +159,7 @@ fi
 mkrepo $REPONAME &&
 cd $REPONAME &&
 start_idea $REPONAME
-git_push
+[[ "$NO_COMMIT" != "true" ]] && git_push
 echo 
 echo 
 echo ====================
